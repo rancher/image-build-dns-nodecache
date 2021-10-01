@@ -1,5 +1,5 @@
 ARG UBI_IMAGE=registry.access.redhat.com/ubi7/ubi-minimal:latest
-ARG GO_IMAGE=rancher/hardened-build-base:v1.15.8b5
+ARG GO_IMAGE=rancher/hardened-build-base:v1.16.7b7
 # We need iptables and ip6tables. We will get them from the hardened kube-proxy image
 ARG KUBE_PROXY_IMAGE=rancher/hardened-kube-proxy:v1.21.3-build20210716
 
