@@ -1,5 +1,5 @@
 ARG UBI_IMAGE=registry.access.redhat.com/ubi7/ubi-minimal:latest
-ARG GO_IMAGE=rancher/hardened-build-base:v1.16.7b7
+ARG GO_IMAGE=rancher/hardened-build-base:v1.16.9b7
 # We need iptables and ip6tables. We will get them from the hardened kube-proxy image
 ARG KUBE_PROXY_IMAGE=rancher/hardened-kube-proxy:v1.21.3-build20210716
 
@@ -30,7 +30,9 @@ RUN git checkout tags/${TAG} -b ${TAG}
 RUN GOARCH=${ARCH} GO_LDFLAGS="-linkmode=external -X ${PKG}/pkg/version.VERSION=${TAG}" \
     go-build-static.sh -gcflags=-trimpath=${GOPATH}/src -o . ./...
 RUN go-assert-static.sh node-cache
-RUN go-assert-boring.sh node-cache
+RUN if [ "${ARCH}" != "s390x" ]; then \
+      go-assert-boring.sh node-cache; \
+    fi
 RUN install -s node-cache /usr/local/bin
 
 FROM ubi as dnsNodeCache
