@@ -49,7 +49,7 @@ volumes:
 ---
 kind: pipeline
 type: docker
-name: linux-amd64
+name: linux-s390x
 
 platform:
   os: linux
