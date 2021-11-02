@@ -1,12 +1,12 @@
 ARG UBI_IMAGE=registry.access.redhat.com/ubi7/ubi-minimal:latest
 ARG GO_IMAGE=rancher/hardened-build-base:v1.16.9b7
-# We need iptables and ip6tables. We will get them from the hardened kube-proxy image
-ARG KUBE_PROXY_IMAGE=rancher/hardened-kube-proxy:v1.21.3-build20210716
+# We need iptables and ip6tables. We will get them from the hardened kubernetes image
+ARG KUBERNETES=rancher/hardened-kubernetes:v1.22.3-rke2r1-build20211028
 
 ARG TAG="1.19.1"
 ARG ARCH="amd64"
 FROM ${UBI_IMAGE} as ubi
-FROM ${KUBE_PROXY_IMAGE} as kube-proxy
+FROM ${KUBERNETES} as kubernetes
 FROM ${GO_IMAGE} as base-builder
 # setup required packages
 RUN set -x \
@@ -40,6 +40,6 @@ RUN microdnf update -y && \
     microdnf install nc which && \
     rm -rf /var/cache/yum
 COPY --from=dnsNodeCache-builder /usr/local/bin/node-cache /node-cache
-COPY --from=kube-proxy /usr/sbin/ip* /usr/sbin/
-COPY --from=kube-proxy /usr/sbin/xtables* /usr/sbin/
+COPY --from=kubernetes /usr/sbin/ip* /usr/sbin/
+COPY --from=kubernetes /usr/sbin/xtables* /usr/sbin/
 ENTRYPOINT ["/node-cache"]
