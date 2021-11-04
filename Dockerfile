@@ -3,7 +3,7 @@ ARG GO_IMAGE=rancher/hardened-build-base:v1.16.9b7
 # We need iptables and ip6tables. We will get them from the hardened kubernetes image
 ARG KUBERNETES=rancher/hardened-kubernetes:v1.22.3-rke2r1-build20211028
 
-ARG TAG="1.19.1"
+ARG TAG="1.21.1"
 ARG ARCH="amd64"
 FROM ${UBI_IMAGE} as ubi
 FROM ${KUBERNETES} as kubernetes
