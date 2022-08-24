@@ -1,11 +1,11 @@
-ARG UBI_IMAGE=registry.access.redhat.com/ubi7/ubi-minimal:latest
-ARG GO_IMAGE=rancher/hardened-build-base:v1.16.10b7
+ARG BCI_IMAGE=registry.suse.com/bci/bci-base:latest
+ARG GO_IMAGE=rancher/hardened-build-base:v1.18.5b7
 # We need iptables and ip6tables. We will get them from the hardened kubernetes image
 ARG KUBERNETES=rancher/hardened-kubernetes:v1.22.3-rke2r1-build20211028
 
 ARG TAG="1.21.1"
 ARG ARCH="amd64"
-FROM ${UBI_IMAGE} as ubi
+FROM ${BCI_IMAGE} as bci
 FROM ${KUBERNETES} as kubernetes
 FROM ${GO_IMAGE} as base-builder
 # setup required packages
@@ -35,10 +35,8 @@ RUN if [ "${ARCH}" != "s390x" ]; then \
     fi
 RUN install -s node-cache /usr/local/bin
 
-FROM ubi as dnsNodeCache
-RUN microdnf update -y && \
-    microdnf install nc which && \
-    rm -rf /var/cache/yum
+FROM bci as dnsNodeCache
+RUN zypper install -y netcat which
 COPY --from=dnsNodeCache-builder /usr/local/bin/node-cache /node-cache
 COPY --from=kubernetes /usr/sbin/ip* /usr/sbin/
 COPY --from=kubernetes /usr/sbin/xtables* /usr/sbin/
