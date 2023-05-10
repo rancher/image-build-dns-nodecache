@@ -30,7 +30,7 @@ RUN git checkout tags/${TAG} -b ${TAG}
 RUN GOARCH=${ARCH} GO_LDFLAGS="-linkmode=external -X ${PKG}/pkg/version.VERSION=${TAG}" \
     go-build-static.sh -gcflags=-trimpath=${GOPATH}/src -o . ./...
 RUN go-assert-static.sh node-cache
-RUN if [ "${ARCH}" != "s390x" || "${ARCH}" != "arm64" ]; then \
+RUN if [ "${ARCH}" = "amd64" ]; then \
         go-assert-boring.sh node-cache; \
     fi
 RUN install -s node-cache /usr/local/bin
