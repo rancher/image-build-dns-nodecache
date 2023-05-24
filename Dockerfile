@@ -1,14 +1,14 @@
 ARG BCI_IMAGE=registry.suse.com/bci/bci-base
 ARG GO_IMAGE=rancher/hardened-build-base:v1.20.4b11
 # We need iptables and ip6tables. We will get them from the hardened kubernetes image
-ARG KUBERNETES=rancher/hardened-kubernetes:v1.26.3-rke2r1-build20230317
+ARG KUBERNETES=rancher/hardened-kubernetes:v1.27.2-rke2r1-build20230518
 
 ARG TAG="1.22.20"
 ARG ARCH="amd64"
 FROM ${BCI_IMAGE} as bci
 FROM ${KUBERNETES} as kubernetes
-FROM ${GO_IMAGE} as base-builder
-# setup required packages
+FROM ${GO_IMAGE} as base
+
 RUN set -x && \
     apk --no-cache add \
     file \
@@ -16,8 +16,7 @@ RUN set -x && \
     git \
     make
 
-# setup the dnsNodeCache build
-FROM base-builder as dnsNodeCache-builder
+FROM base as builder
 ARG SRC=github.com/kubernetes/dns
 ARG PKG=github.com/kubernetes/dns
 RUN git clone --depth=1 https://${SRC}.git $GOPATH/src/${PKG}
@@ -35,9 +34,9 @@ RUN if [ "${ARCH}" = "amd64" ]; then \
     fi
 RUN install -s node-cache /usr/local/bin
 
-FROM bci as dnsNodeCache
+FROM bci
 RUN zypper install -y netcat which
-COPY --from=dnsNodeCache-builder /usr/local/bin/node-cache /node-cache
+COPY --from=builder /usr/local/bin/node-cache /node-cache
 COPY --from=kubernetes /usr/sbin/ip* /usr/sbin/
 COPY --from=kubernetes /usr/sbin/xtables* /usr/sbin/
 ENTRYPOINT ["/node-cache"]
