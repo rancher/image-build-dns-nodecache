@@ -50,5 +50,5 @@ image-manifest:
 
 .PHONY: image-scan
 image-scan:
-	trivy --severity $(SEVERITIESdnsNodeCache) --no-progress --ignore-unfixed $(ORG)/hardened-dns-node-cache:$(TAG)
+	trivy image --severity $(SEVERITIESdnsNodeCache) --no-progress --ignore-unfixed $(ORG)/hardened-dns-node-cache:$(TAG)
 
