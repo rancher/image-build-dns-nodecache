@@ -1,4 +1,4 @@
-ARG BCI_IMAGE=registry.suse.com/bci/bci-base
+ARG BCI_IMAGE=registry.suse.com/bci/bci-busybox
 ARG GO_IMAGE=rancher/hardened-build-base:v1.20.7b3
 # We need iptables and ip6tables. We will get them from the hardened kubernetes image
 ARG KUBERNETES=rancher/hardened-kubernetes:v1.27.2-rke2r1-build20230518
@@ -35,7 +35,6 @@ RUN if [ "${ARCH}" = "amd64" ]; then \
 RUN install -s node-cache /usr/local/bin
 
 FROM bci
-RUN zypper install -y netcat which
 COPY --from=builder /usr/local/bin/node-cache /node-cache
 COPY --from=kubernetes /usr/sbin/ip* /usr/sbin/
 COPY --from=kubernetes /usr/sbin/xtables* /usr/sbin/
