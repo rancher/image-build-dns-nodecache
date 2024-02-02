@@ -3,7 +3,7 @@ ARG GO_IMAGE=rancher/hardened-build-base:v1.20.7b3
 # We need iptables and ip6tables. We will get them from the hardened kubernetes image
 ARG KUBERNETES=rancher/hardened-kubernetes:v1.29.1-rke2r1-build20240117
 
-ARG TAG="1.22.28"
+ARG TAG=1.22.28
 ARG ARCH="amd64"
 FROM ${BCI_IMAGE} as bci
 FROM ${KUBERNETES} as kubernetes
@@ -20,7 +20,7 @@ FROM base as builder
 ARG SRC=github.com/kubernetes/dns
 ARG PKG=github.com/kubernetes/dns
 RUN git clone --depth=1 https://${SRC}.git $GOPATH/src/${PKG}
-ARG TAG
+ARG TAG=1.22.28
 ARG ARCH
 WORKDIR $GOPATH/src/${PKG}
 RUN git tag --list
