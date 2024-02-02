@@ -1,11 +1,7 @@
 ARG BCI_IMAGE=registry.suse.com/bci/bci-busybox
 ARG GO_IMAGE=rancher/hardened-build-base:v1.20.7b3
-# We need iptables and ip6tables. We will get them from the hardened kubernetes image
-ARG KUBERNETES=rancher/hardened-kubernetes:v1.29.1-rke2r1-build20240117
 
-ARG ARCH="amd64"
 FROM ${BCI_IMAGE} as bci
-FROM ${KUBERNETES} as kubernetes
 FROM ${GO_IMAGE} as base
 
 RUN set -x && \
@@ -16,6 +12,10 @@ RUN set -x && \
     make
 
 FROM base as builder
+ARG ARCH="amd64"
+ARG K3S_ROOT_VERSION=v0.13.0
+ADD https://github.com/rancher/k3s-root/releases/download/${K3S_ROOT_VERSION}/k3s-root-xtables-${ARCH}.tar /opt/xtables/k3s-root-xtables.tar
+RUN tar xvf /opt/xtables/k3s-root-xtables.tar -C /opt/xtables
 ARG SRC=github.com/kubernetes/dns
 ARG PKG=github.com/kubernetes/dns
 RUN git clone --depth=1 https://${SRC}.git $GOPATH/src/${PKG}
@@ -35,6 +35,5 @@ RUN install -s node-cache /usr/local/bin
 
 FROM bci
 COPY --from=builder /usr/local/bin/node-cache /node-cache
-COPY --from=kubernetes /usr/sbin/ip* /usr/sbin/
-COPY --from=kubernetes /usr/sbin/xtables* /usr/sbin/
+COPY --from=builder /opt/xtables/bin/ /usr/sbin/
 ENTRYPOINT ["/node-cache"]
