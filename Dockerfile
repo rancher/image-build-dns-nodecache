@@ -19,7 +19,7 @@ RUN tar xvf /opt/xtables/k3s-root-xtables.tar -C /opt/xtables
 ARG SRC=github.com/kubernetes/dns
 ARG PKG=github.com/kubernetes/dns
 RUN git clone --depth=1 https://${SRC}.git $GOPATH/src/${PKG}
-ARG TAG=1.22.28
+ARG TAG=1.23.0
 ARG ARCH
 WORKDIR $GOPATH/src/${PKG}
 RUN git tag --list
