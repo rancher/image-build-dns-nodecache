@@ -28,7 +28,6 @@ image-build:
 		--load \
 		--build-arg PKG=$(PKG) \
 		--build-arg SRC=$(SRC) \
-		--build-arg ARCH=$(ARCH) \
 		--build-arg TAG=$(TAG:$(BUILD_META)=) \
 		--tag $(ORG)/hardened-dns-node-cache:$(TAG) \
 		--tag $(ORG)/hardened-dns-node-cache:$(TAG)-$(ARCH) \
