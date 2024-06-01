@@ -15,7 +15,7 @@ FROM base as builder
 ARG TARGETPLATFORM
 RUN set -x && \
     xx-apk add musl-dev gcc  lld 
-ARG TAG=1.23.0
+ARG TAG=1.23.1
 ARG K3S_ROOT_VERSION=v0.13.0
 RUN export ARCH=$(xx-info arch) &&\
     mkdir -p /opt/xtables/ &&\
