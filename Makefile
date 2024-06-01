@@ -14,7 +14,7 @@ BUILD_META=-build$(shell date +%Y%m%d)
 ORG ?= rancher
 PKG ?= github.com/kubernetes/dns
 SRC ?= github.com/kubernetes/dns
-TAG ?= 1.23.0$(BUILD_META)
+TAG ?= 1.23.1$(BUILD_META)
 
 ifeq (,$(filter %$(BUILD_META),$(TAG)))
 $(error TAG $(TAG) needs to end with build metadata: $(BUILD_META))
