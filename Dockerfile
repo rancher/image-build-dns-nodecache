@@ -16,7 +16,7 @@ ARG TARGETPLATFORM
 RUN set -x && \
     xx-apk add musl-dev gcc  lld 
 ARG TAG=1.23.1
-ARG K3S_ROOT_VERSION=v0.14.0
+ARG K3S_ROOT_VERSION=v0.14.1
 RUN export ARCH=$(xx-info arch) &&\
     mkdir -p /opt/xtables/ &&\
     wget https://github.com/rancher/k3s-root/releases/download/${K3S_ROOT_VERSION}/k3s-root-xtables-${ARCH}.tar -O /opt/xtables/k3s-root-xtables.tar
