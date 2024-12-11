@@ -17,7 +17,7 @@ SRC ?= github.com/kubernetes/dns
 TAG ?= ${GITHUB_ACTION_TAG}
 
 ifeq ($(TAG),)
-TAG := 1.23.1$(BUILD_META)
+TAG := 1.24.0$(BUILD_META)
 endif
 
 ifeq (,$(filter %$(BUILD_META),$(TAG)))
