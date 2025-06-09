@@ -53,7 +53,7 @@ push-image:
 
 .PHONY: image-scan
 image-scan:
-	trivy image --severity $(SEVERITIES) --no-progress --ignore-unfixed $(ORG)/hardened-dns-node-cache:$(TAG)
+	trivy image --severity $(SEVERITIES) --no-progress --ignore-unfixed $(IMAGE)
 
 .PHONY: log
 log:
