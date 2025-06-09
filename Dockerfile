@@ -2,16 +2,16 @@ ARG BCI_IMAGE=registry.suse.com/bci/bci-busybox
 ARG GO_IMAGE=rancher/hardened-build-base:v1.23.8b1
 
 # Image that provides cross compilation tooling.
-FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.5.0 as xx
+FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.5.0 AS xx
 
-FROM ${BCI_IMAGE} as bci
+FROM ${BCI_IMAGE} AS bci
 
-FROM --platform=$BUILDPLATFORM ${GO_IMAGE} as base
+FROM --platform=$BUILDPLATFORM ${GO_IMAGE} AS base
 COPY --from=xx / /
 RUN set -x && \
     apk add file make git clang lld
 
-FROM base as builder
+FROM base AS builder
 ARG TARGETPLATFORM
 RUN set -x && \
     xx-apk add musl-dev gcc  lld 
@@ -39,7 +39,7 @@ RUN if [ `xx-info arch` = "amd64" ]; then \
 RUN install  node-cache /usr/local/bin
 
 #strip needs to run on TARGETPLATFORM, not BUILDPLATFORM
-FROM ${GO_IMAGE} as strip_binary
+FROM ${GO_IMAGE} AS strip_binary
 COPY --from=builder /usr/local/bin/node-cache /node-cache
 RUN strip /node-cache
 
