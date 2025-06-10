@@ -29,6 +29,12 @@ WORKDIR $GOPATH/src/${PKG}
 RUN git tag --list
 RUN git fetch --all --tags --prune
 RUN git checkout tags/${TAG} -b ${TAG}
+# Temporary patch for CVE-2025-47950
+# Remove once kubernetes/dns is updated to a version that includes the fix.
+# Also includes fix for https://github.com/kubernetes-sigs/structured-merge-diff/issues/268
+RUN go mod edit -replace github.com/coredns/coredns=github.com/coredns/coredns@v1.12.2; \
+    go mod edit -replace sigs.k8s.io/structured-merge-diff/v4=sigs.k8s.io/structured-merge-diff/v4@v4.4.3; \
+    go mod tidy && go mod vendor
 RUN xx-go --wrap &&\
     GO_LDFLAGS="-linkmode=external -X ${PKG}/pkg/version.VERSION=${TAG}" \
     go-build-static.sh -gcflags=-trimpath=${GOPATH}/src -o . ./...
