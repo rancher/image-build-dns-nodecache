@@ -3,6 +3,12 @@ github:
   email: "41898282+github-actions[bot]@users.noreply.github.com"
   username: "UPDATECLI_GITHUB_ACTOR"
   token: "UPDATECLI_GITHUB_TOKEN"
-  repository: "image-build-dns-nodecache"
-  branch: "main"
-  owner: "rancher"
+scm:
+  default:
+    owner: rancher
+    repository: image-build-dns-nodecache
+    branch: main
+  upstream:
+    owner: kubernetes
+    repository: dns
+    branch: master
