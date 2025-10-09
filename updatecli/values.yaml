@@ -12,3 +12,6 @@ scm:
     owner: kubernetes
     repository: dns
     branch: master
+  buildbase:
+    owner: rancher
+    repository: image-build-base
