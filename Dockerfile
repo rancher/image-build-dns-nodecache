@@ -1,5 +1,5 @@
 ARG BCI_IMAGE=registry.suse.com/bci/bci-busybox
-ARG GO_IMAGE=rancher/hardened-build-base:v1.23.12b1
+ARG GO_IMAGE=rancher/hardened-build-base:v1.24.9b1
 
 # Image that provides cross compilation tooling.
 FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.6.1 AS xx
@@ -15,7 +15,7 @@ FROM base AS builder
 ARG TARGETPLATFORM
 RUN set -x && \
     xx-apk add musl-dev gcc  lld 
-ARG TAG=1.26.5
+ARG TAG=1.26.7
 ARG K3S_ROOT_VERSION=v0.15.0
 RUN export ARCH=$(xx-info arch) &&\
     mkdir -p /opt/xtables/ &&\
