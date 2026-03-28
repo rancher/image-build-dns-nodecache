@@ -18,8 +18,15 @@ RUN set -x && \
 ARG TAG=1.26.7
 ARG K3S_ROOT_VERSION=v0.15.0
 RUN export ARCH=$(xx-info arch) &&\
+    case "${ARCH}" in \
+        amd64)  XTABLES_SHA256="8dc4673efcbc4caf0f9a5a20b4df13609a9f305b8b42e5df842c9808ade3402d" ;; \
+        arm64)  XTABLES_SHA256="7d85b0102e5a340a038c577fbbdc7fd84c018da31595a84453fa564b99e2c0fd" ;; \
+        arm)    XTABLES_SHA256="41779cf870fdcc21dcc459be0e500b32ae55fc8c2c8587cd08dee7aa19d47673" ;; \
+        *)      echo "No pinned SHA256 for k3s-root-xtables on arch: ${ARCH}" >&2; exit 1 ;; \
+    esac &&\
     mkdir -p /opt/xtables/ &&\
-    wget https://github.com/rancher/k3s-root/releases/download/${K3S_ROOT_VERSION}/k3s-root-xtables-${ARCH}.tar -O /opt/xtables/k3s-root-xtables.tar
+    wget -q "https://github.com/rancher/k3s-root/releases/download/${K3S_ROOT_VERSION}/k3s-root-xtables-${ARCH}.tar" -O /opt/xtables/k3s-root-xtables.tar &&\
+    echo "${XTABLES_SHA256}  /opt/xtables/k3s-root-xtables.tar" | sha256sum -c -
 RUN tar xvf /opt/xtables/k3s-root-xtables.tar -C /opt/xtables
 
 ARG SRC=github.com/kubernetes/dns
