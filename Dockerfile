@@ -24,10 +24,17 @@ RUN export ARCH=$(xx-info arch) &&\
         arm)    XTABLES_SHA256="e6ae1a422f3d2d85347439ecd66eec5d5a05b0ce960f5a7d888610240cb14067" ;; \
         *)      echo "No pinned SHA256 for k3s-root-xtables on arch: ${ARCH}" >&2; exit 1 ;; \
     esac &&\
-    mkdir -p /opt/xtables/ &&\
-    wget -q "https://github.com/rancher/k3s-root/releases/download/${K3S_ROOT_VERSION}/k3s-root-xtables-${ARCH}.tar" -O /opt/xtables/k3s-root-xtables.tar &&\
-    echo "${XTABLES_SHA256}  /opt/xtables/k3s-root-xtables.tar" | sha256sum -c -
-RUN tar xvf /opt/xtables/k3s-root-xtables.tar -C /opt/xtables
+    mkdir -p /opt/k3s-root/ &&\
+    wget -q "https://github.com/rancher/k3s-root/releases/download/${K3S_ROOT_VERSION}/k3s-root-${ARCH}.tar" -O /opt/k3s-root/k3s-root.tar &&\
+    echo "${K3S_ROOT_SHA256}  /opt/k3s-root/k3s-root.tar" | sha256sum -c -
+# Extract the k3s-root rootfs. It provides a statically linked busybox and
+# coreutils (needed by the iptables wrapper scripts since bci-nano ships no
+# shell) plus the static iptables/xtables binaries under bin/aux. Move the
+# xtables binaries into usr/sbin so bin/ contains only the shell utilities.
+RUN tar xf /opt/k3s-root/k3s-root.tar -C /opt/k3s-root &&\
+    mkdir -p /opt/k3s-root/usr/sbin &&\
+    mv /opt/k3s-root/bin/aux/* /opt/k3s-root/usr/sbin/ &&\
+    rmdir /opt/k3s-root/bin/aux
 
 ARG SRC=github.com/kubernetes-sigs/node-local-dns
 ARG PKG=github.com/kubernetes-sigs/node-local-dns
@@ -54,5 +61,6 @@ RUN strip /node-cache
 
 FROM bci
 COPY --from=strip_binary /node-cache /node-cache
-COPY --from=builder /opt/xtables/bin/ /usr/sbin/
+COPY --from=builder /opt/k3s-root/bin/ /bin/
+COPY --from=builder /opt/k3s-root/usr/sbin/ /usr/sbin/
 ENTRYPOINT ["/node-cache"]
