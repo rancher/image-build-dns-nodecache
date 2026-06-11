@@ -1,4 +1,4 @@
-ARG BCI_IMAGE=registry.suse.com/bci/bci-busybox
+ARG BCI_IMAGE=registry.suse.com/bci/bci-nano:16.0
 ARG GO_IMAGE=rancher/hardened-build-base:v1.25.11b1
 
 # Image that provides cross compilation tooling.
@@ -19,15 +19,22 @@ ARG TAG=1.26.8
 ARG K3S_ROOT_VERSION=v0.15.0
 RUN export ARCH=$(xx-info arch) &&\
     case "${ARCH}" in \
-        amd64)  XTABLES_SHA256="8dc4673efcbc4caf0f9a5a20b4df13609a9f305b8b42e5df842c9808ade3402d" ;; \
-        arm64)  XTABLES_SHA256="7d85b0102e5a340a038c577fbbdc7fd84c018da31595a84453fa564b99e2c0fd" ;; \
-        arm)    XTABLES_SHA256="41779cf870fdcc21dcc459be0e500b32ae55fc8c2c8587cd08dee7aa19d47673" ;; \
-        *)      echo "No pinned SHA256 for k3s-root-xtables on arch: ${ARCH}" >&2; exit 1 ;; \
+        amd64)  K3S_ROOT_SHA256="20066815d9941185fce3934cc3bae2fa3e2dbb46ca7e63462efb2ea59f1b15c4" ;; \
+        arm64)  K3S_ROOT_SHA256="4bdfc715dc8b5e2c4956f8686b895a56386f4cc6468215dcd22130a680650577" ;; \
+        arm)    K3S_ROOT_SHA256="2e43dac7750da52a756a9d4e8598d6e89937d565582660b26ca124bd9c8dbfaa" ;; \
+        *)      echo "No pinned SHA256 for k3s-root on arch: ${ARCH}" >&2; exit 1 ;; \
     esac &&\
-    mkdir -p /opt/xtables/ &&\
-    wget -q "https://github.com/rancher/k3s-root/releases/download/${K3S_ROOT_VERSION}/k3s-root-xtables-${ARCH}.tar" -O /opt/xtables/k3s-root-xtables.tar &&\
-    echo "${XTABLES_SHA256}  /opt/xtables/k3s-root-xtables.tar" | sha256sum -c -
-RUN tar xvf /opt/xtables/k3s-root-xtables.tar -C /opt/xtables
+    mkdir -p /opt/k3s-root/ &&\
+    wget -q "https://github.com/rancher/k3s-root/releases/download/${K3S_ROOT_VERSION}/k3s-root-${ARCH}.tar" -O /opt/k3s-root/k3s-root.tar &&\
+    echo "${K3S_ROOT_SHA256}  /opt/k3s-root/k3s-root.tar" | sha256sum -c -
+# Extract the k3s-root rootfs. It provides a statically linked busybox and
+# coreutils (needed by the iptables wrapper scripts since bci-nano ships no
+# shell) plus the static iptables/xtables binaries under bin/aux. Move the
+# xtables binaries into usr/sbin so bin/ contains only the shell utilities.
+RUN tar xf /opt/k3s-root/k3s-root.tar -C /opt/k3s-root &&\
+    mkdir -p /opt/k3s-root/usr/sbin &&\
+    mv /opt/k3s-root/bin/aux/* /opt/k3s-root/usr/sbin/ &&\
+    rmdir /opt/k3s-root/bin/aux
 
 ARG SRC=github.com/kubernetes/dns
 ARG PKG=github.com/kubernetes/dns
@@ -56,5 +63,6 @@ RUN strip /node-cache
 
 FROM bci
 COPY --from=strip_binary /node-cache /node-cache
-COPY --from=builder /opt/xtables/bin/ /usr/sbin/
+COPY --from=builder /opt/k3s-root/bin/ /bin/
+COPY --from=builder /opt/k3s-root/usr/sbin/ /usr/sbin/
 ENTRYPOINT ["/node-cache"]
