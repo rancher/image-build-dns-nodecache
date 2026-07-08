@@ -21,7 +21,7 @@ RUN export ARCH=$(xx-info arch) &&\
     case "${ARCH}" in \
         amd64)  XTABLES_SHA256="8dc4673efcbc4caf0f9a5a20b4df13609a9f305b8b42e5df842c9808ade3402d" ;; \
         arm64)  XTABLES_SHA256="7d85b0102e5a340a038c577fbbdc7fd84c018da31595a84453fa564b99e2c0fd" ;; \
-        arm)    XTABLES_SHA256="41779cf870fdcc21dcc459be0e500b32ae55fc8c2c8587cd08dee7aa19d47673" ;; \
+        arm)    XTABLES_SHA256="e6ae1a422f3d2d85347439ecd66eec5d5a05b0ce960f5a7d888610240cb14067" ;; \
         *)      echo "No pinned SHA256 for k3s-root-xtables on arch: ${ARCH}" >&2; exit 1 ;; \
     esac &&\
     mkdir -p /opt/xtables/ &&\
