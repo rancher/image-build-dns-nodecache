@@ -40,6 +40,8 @@ RUN go mod edit -replace github.com/coredns/coredns=github.com/coredns/coredns@v
     go mod edit -replace google.golang.org/grpc=google.golang.org/grpc@v1.79.3 && \
     go mod edit -replace go.opentelemetry.io/otel/sdk=go.opentelemetry.io/otel/sdk@v1.43.0 && \
     go mod tidy && go mod vendor
+COPY go-mod-overrides ./go-mod-overrides
+RUN go-mod-overrides.sh ./go-mod-overrides
 RUN xx-go --wrap &&\
     GO_LDFLAGS="-linkmode=external -X ${PKG}/pkg/version.VERSION=${TAG}" \
     go-build-static.sh -gcflags=-trimpath=${GOPATH}/src -o . ./...
