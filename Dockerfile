@@ -16,7 +16,7 @@ ARG TARGETPLATFORM
 RUN set -x && \
     xx-apk add musl-dev gcc  lld 
 ARG TAG=1.26.8
-ARG K3S_ROOT_VERSION=v0.15.0
+ARG K3S_ROOT_VERSION=v0.15.2
 RUN export ARCH=$(xx-info arch) &&\
     case "${ARCH}" in \
         amd64)  XTABLES_SHA256="8dc4673efcbc4caf0f9a5a20b4df13609a9f305b8b42e5df842c9808ade3402d" ;; \
