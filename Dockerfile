@@ -29,8 +29,8 @@ RUN export ARCH=$(xx-info arch) &&\
     echo "${XTABLES_SHA256}  /opt/xtables/k3s-root-xtables.tar" | sha256sum -c -
 RUN tar xvf /opt/xtables/k3s-root-xtables.tar -C /opt/xtables
 
-ARG SRC=github.com/kubernetes/dns
-ARG PKG=github.com/kubernetes/dns
+ARG SRC=github.com/kubernetes-sigs/node-local-dns
+ARG PKG=github.com/kubernetes-sigs/node-local-dns
 RUN git clone --depth=1 https://${SRC}.git $GOPATH/src/${PKG}
 WORKDIR $GOPATH/src/${PKG}
 RUN git tag --list
