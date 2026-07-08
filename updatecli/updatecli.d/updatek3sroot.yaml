@@ -1,22 +1,46 @@
 ---
-name: "Update k3sroot version" 
+name: "Update k3sroot version"
 
 sources:
- k3sroot:
-   name: Get k3s-root version
-   kind: githubrelease
-   spec:
-     owner: k3s-io
-     repository: k3s-root
-     token: '{{ requiredEnv .github.token }}'
-     typefilter:
-       release: true
-       draft: false
-       prerelease: false
-     versionfilter:
-       kind: semver
-       # pattern accepts any semver constraint
-       pattern: "*"
+  k3sroot:
+    name: Get k3s-root version
+    kind: githubrelease
+    spec:
+      owner: k3s-io
+      repository: k3s-root
+      token: '{{ requiredEnv .github.token }}'
+      typefilter:
+        release: true
+        draft: false
+        prerelease: false
+      versionfilter:
+        kind: semver
+        # pattern accepts any semver constraint
+        pattern: "*"
+
+  xtables_sha256_amd64:
+    name: Get k3s-root-xtables amd64 SHA256
+    kind: shell
+    dependson:
+      - k3sroot
+    spec:
+      command: 'curl -sL "https://github.com/rancher/k3s-root/releases/download/{{ source "k3sroot" }}/sha256sum-amd64.txt" | awk ''/k3s-root-xtables-amd64.tar/{print $1; exit}'''
+
+  xtables_sha256_arm64:
+    name: Get k3s-root-xtables arm64 SHA256
+    kind: shell
+    dependson:
+      - k3sroot
+    spec:
+      command: 'curl -sL "https://github.com/rancher/k3s-root/releases/download/{{ source "k3sroot" }}/sha256sum-arm64.txt" | awk ''/k3s-root-xtables-arm64.tar/{print $1; exit}'''
+
+  xtables_sha256_arm:
+    name: Get k3s-root-xtables arm SHA256
+    kind: shell
+    dependson:
+      - k3sroot
+    spec:
+      command: 'curl -sL "https://github.com/rancher/k3s-root/releases/download/{{ source "k3sroot" }}/sha256sum-arm.txt" | awk ''/k3s-root-xtables-arm.tar/{print $1; exit}'''
 
 targets:
   dockerfile:
@@ -29,6 +53,36 @@ targets:
       instruction:
         keyword: "ARG"
         matcher: "K3S_ROOT_VERSION"
+
+  dockerfile_xtables_sha256_amd64:
+    name: "Bump k3s-root-xtables amd64 SHA256 in Dockerfile"
+    kind: file
+    scmid: default
+    sourceid: xtables_sha256_amd64
+    spec:
+      file: "Dockerfile"
+      matchpattern: '(?m)^\s*amd64\)\s+XTABLES_SHA256="[a-f0-9]{64}"'
+      replacepattern: '        amd64)  XTABLES_SHA256="{{ source "xtables_sha256_amd64" }}"'
+
+  dockerfile_xtables_sha256_arm64:
+    name: "Bump k3s-root-xtables arm64 SHA256 in Dockerfile"
+    kind: file
+    scmid: default
+    sourceid: xtables_sha256_arm64
+    spec:
+      file: "Dockerfile"
+      matchpattern: '(?m)^\s*arm64\)\s+XTABLES_SHA256="[a-f0-9]{64}"'
+      replacepattern: '        arm64)  XTABLES_SHA256="{{ source "xtables_sha256_arm64" }}"'
+
+  dockerfile_xtables_sha256_arm:
+    name: "Bump k3s-root-xtables arm SHA256 in Dockerfile"
+    kind: file
+    scmid: default
+    sourceid: xtables_sha256_arm
+    spec:
+      file: "Dockerfile"
+      matchpattern: '(?m)^\s*arm\)\s+XTABLES_SHA256="[a-f0-9]{64}"'
+      replacepattern: '        arm)    XTABLES_SHA256="{{ source "xtables_sha256_arm" }}"'
 
 scms:
   default:
@@ -43,14 +97,14 @@ scms:
       branch: '{{ .scm.default.branch }}'
       
 actions:
-    default:
-        title: 'Bump K3s-root version to {{ source "k3sroot" }}'
-        kind: github/pullrequest
-        spec:
-            automerge: false
-            labels:
-                - chore
-                - skip-changelog
-                - status/auto-created
-        scmid: default
+  default:
+    title: 'Bump K3s-root version and xtables checksums to {{ source "k3sroot" }}'
+    kind: github/pullrequest
+    spec:
+      automerge: false
+      labels:
+        - chore
+        - skip-changelog
+        - status/auto-created
+    scmid: default
 
