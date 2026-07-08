@@ -36,10 +36,6 @@ WORKDIR $GOPATH/src/${PKG}
 RUN git tag --list
 RUN git fetch --all --tags --prune
 RUN git checkout tags/${TAG} -b ${TAG}
-RUN go mod edit -replace github.com/coredns/coredns=github.com/coredns/coredns@v1.14.3 && \
-    go mod edit -replace google.golang.org/grpc=google.golang.org/grpc@v1.79.3 && \
-    go mod edit -replace go.opentelemetry.io/otel/sdk=go.opentelemetry.io/otel/sdk@v1.43.0 && \
-    go mod tidy && go mod vendor
 COPY go-mod-overrides ./go-mod-overrides
 RUN go-mod-overrides.sh ./go-mod-overrides
 RUN xx-go --wrap &&\
