@@ -3,6 +3,7 @@
 -replace golang.org/x/net=golang.org/x/net@v0.55.0
 
 # Ported from the Dockerfile's inline `go mod edit` block; may no longer be needed.
+# Remove when upstream node-cache > 1.26.8 is tagged.
 -replace github.com/coredns/coredns=github.com/coredns/coredns@v1.14.3
 -replace google.golang.org/grpc=google.golang.org/grpc@v1.79.3
 -replace go.opentelemetry.io/otel/sdk=go.opentelemetry.io/otel/sdk@v1.43.0
