@@ -2,6 +2,15 @@
 # Drop once upstream requires golang.org/x/net >= v0.55.0.
 -replace golang.org/x/net=golang.org/x/net@v0.55.0
 
+# golang.org/x/crypto: CVE-2026-39828/39829/39830/39831/39832/39835/42508/46595/46597 (HIGH),
+# CVE-2026-39827/39833/39834/46598 (MEDIUM) — golang.org/x/crypto/ssh & ssh/agent.
+# Drop once upstream requires golang.org/x/crypto >= v0.52.0.
+-replace golang.org/x/crypto=golang.org/x/crypto@v0.52.0
+
+# github.com/quic-go/quic-go: CVE-2026-40898 (QUIC protocol DoS).
+# Drop once upstream requires github.com/quic-go/quic-go >= v0.59.1.
+-replace github.com/quic-go/quic-go=github.com/quic-go/quic-go@v0.59.1
+
 # Ported from the Dockerfile's inline `go mod edit` block; may no longer be needed.
 # Remove when upstream node-cache > 1.26.8 is tagged.
 -replace github.com/coredns/coredns=github.com/coredns/coredns@v1.14.3
