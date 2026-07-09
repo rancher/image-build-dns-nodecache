@@ -1,5 +1,5 @@
 ARG BCI_IMAGE=registry.suse.com/bci/bci-busybox
-ARG GO_IMAGE=rancher/hardened-build-base:v1.25.11b1
+ARG GO_IMAGE=rancher/hardened-build-base:v1.25.12b1
 
 # Image that provides cross compilation tooling.
 FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.6.1 AS xx
@@ -36,10 +36,8 @@ WORKDIR $GOPATH/src/${PKG}
 RUN git tag --list
 RUN git fetch --all --tags --prune
 RUN git checkout tags/${TAG} -b ${TAG}
-RUN go mod edit -replace github.com/coredns/coredns=github.com/coredns/coredns@v1.14.3 && \
-    go mod edit -replace google.golang.org/grpc=google.golang.org/grpc@v1.79.3 && \
-    go mod edit -replace go.opentelemetry.io/otel/sdk=go.opentelemetry.io/otel/sdk@v1.43.0 && \
-    go mod tidy && go mod vendor
+COPY go-mod-overrides ./go-mod-overrides
+RUN go-mod-overrides.sh ./go-mod-overrides
 RUN xx-go --wrap &&\
     GO_LDFLAGS="-linkmode=external -X ${PKG}/pkg/version.VERSION=${TAG}" \
     go-build-static.sh -gcflags=-trimpath=${GOPATH}/src -o . ./...
