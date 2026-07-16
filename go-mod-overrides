@@ -17,3 +17,7 @@
 # Remove when upstream coredns 1.14.3 is released.
 -replace google.golang.org/grpc=google.golang.org/grpc@v1.79.3
 -replace go.opentelemetry.io/otel/sdk=go.opentelemetry.io/otel/sdk@v1.43.0
+
+# github.com/DataDog/dd-trace-go/v2: CVE-2026-50274 (HIGH) — improper parsing of W3C baggage headers may lead to DoS.
+# Drop once upstream node-cache requires github.com/DataDog/dd-trace-go/v2 >= v2.8.1.
+-replace github.com/DataDog/dd-trace-go/v2=github.com/DataDog/dd-trace-go/v2@v2.8.1
