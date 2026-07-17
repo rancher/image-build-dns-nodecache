@@ -12,8 +12,8 @@ ifndef TARGET_PLATFORMS
 endif
 
 BUILD_META=-build$(shell date +%Y%m%d)
-PKG ?= github.com/kubernetes/dns
-SRC ?= github.com/kubernetes/dns
+PKG ?= github.com/kubernetes-sigs/node-local-dns
+SRC ?= github.com/kubernetes-sigs/node-local-dns
 TAG ?= ${GITHUB_ACTION_TAG}
 
 ifeq ($(TAG),)

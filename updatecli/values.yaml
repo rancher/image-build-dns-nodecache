@@ -9,8 +9,8 @@ scm:
     repository: image-build-dns-nodecache
     branch: main
   upstream:
-    owner: kubernetes
-    repository: dns
+    owner: kubernetes-sigs
+    repository: node-local-dns
     branch: master
   buildbase:
     owner: rancher
