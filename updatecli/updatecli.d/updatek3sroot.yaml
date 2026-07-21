@@ -18,29 +18,29 @@ sources:
         # pattern accepts any semver constraint
         pattern: "*"
 
-  xtables_sha256_amd64:
-    name: Get k3s-root-xtables amd64 SHA256
+  k3sroot_sha256_amd64:
+    name: Get k3s-root amd64 SHA256
     kind: shell
     dependson:
       - k3sroot
     spec:
-      command: 'curl -sL "https://github.com/rancher/k3s-root/releases/download/{{ source "k3sroot" }}/sha256sum-amd64.txt" | awk ''/k3s-root-xtables-amd64.tar/{print $1; exit}'''
+      command: 'curl -sL "https://github.com/rancher/k3s-root/releases/download/{{ source "k3sroot" }}/sha256sum-amd64.txt" | awk ''/k3s-root-amd64.tar/{print $1; exit}'''
 
-  xtables_sha256_arm64:
-    name: Get k3s-root-xtables arm64 SHA256
+  k3sroot_sha256_arm64:
+    name: Get k3s-root arm64 SHA256
     kind: shell
     dependson:
       - k3sroot
     spec:
-      command: 'curl -sL "https://github.com/rancher/k3s-root/releases/download/{{ source "k3sroot" }}/sha256sum-arm64.txt" | awk ''/k3s-root-xtables-arm64.tar/{print $1; exit}'''
+      command: 'curl -sL "https://github.com/rancher/k3s-root/releases/download/{{ source "k3sroot" }}/sha256sum-arm64.txt" | awk ''/k3s-root-arm64.tar/{print $1; exit}'''
 
-  xtables_sha256_arm:
-    name: Get k3s-root-xtables arm SHA256
+  k3sroot_sha256_arm:
+    name: Get k3s-root arm SHA256
     kind: shell
     dependson:
       - k3sroot
     spec:
-      command: 'curl -sL "https://github.com/rancher/k3s-root/releases/download/{{ source "k3sroot" }}/sha256sum-arm.txt" | awk ''/k3s-root-xtables-arm.tar/{print $1; exit}'''
+      command: 'curl -sL "https://github.com/rancher/k3s-root/releases/download/{{ source "k3sroot" }}/sha256sum-arm.txt" | awk ''/k3s-root-arm.tar/{print $1; exit}'''
 
 targets:
   dockerfile:
@@ -54,35 +54,35 @@ targets:
         keyword: "ARG"
         matcher: "K3S_ROOT_VERSION"
 
-  dockerfile_xtables_sha256_amd64:
-    name: "Bump k3s-root-xtables amd64 SHA256 in Dockerfile"
+  dockerfile_k3sroot_sha256_amd64:
+    name: "Bump k3s-root amd64 SHA256 in Dockerfile"
     kind: file
     scmid: default
-    sourceid: xtables_sha256_amd64
+    sourceid: k3sroot_sha256_amd64
     spec:
       file: "Dockerfile"
-      matchpattern: '(?m)^\s*amd64\)\s+XTABLES_SHA256="[a-f0-9]{64}"'
-      replacepattern: '        amd64)  XTABLES_SHA256="{{ source "xtables_sha256_amd64" }}"'
+      matchpattern: '(?m)^\s*amd64\)\s+K3S_ROOT_SHA256="[a-f0-9]{64}"'
+      replacepattern: '        amd64)  K3S_ROOT_SHA256="{{ source "k3sroot_sha256_amd64" }}"'
 
-  dockerfile_xtables_sha256_arm64:
-    name: "Bump k3s-root-xtables arm64 SHA256 in Dockerfile"
+  dockerfile_k3sroot_sha256_arm64:
+    name: "Bump k3s-root arm64 SHA256 in Dockerfile"
     kind: file
     scmid: default
-    sourceid: xtables_sha256_arm64
+    sourceid: k3sroot_sha256_arm64
     spec:
       file: "Dockerfile"
-      matchpattern: '(?m)^\s*arm64\)\s+XTABLES_SHA256="[a-f0-9]{64}"'
-      replacepattern: '        arm64)  XTABLES_SHA256="{{ source "xtables_sha256_arm64" }}"'
+      matchpattern: '(?m)^\s*arm64\)\s+K3S_ROOT_SHA256="[a-f0-9]{64}"'
+      replacepattern: '        arm64)  K3S_ROOT_SHA256="{{ source "k3sroot_sha256_arm64" }}"'
 
-  dockerfile_xtables_sha256_arm:
-    name: "Bump k3s-root-xtables arm SHA256 in Dockerfile"
+  dockerfile_k3sroot_sha256_arm:
+    name: "Bump k3s-root arm SHA256 in Dockerfile"
     kind: file
     scmid: default
-    sourceid: xtables_sha256_arm
+    sourceid: k3sroot_sha256_arm
     spec:
       file: "Dockerfile"
-      matchpattern: '(?m)^\s*arm\)\s+XTABLES_SHA256="[a-f0-9]{64}"'
-      replacepattern: '        arm)    XTABLES_SHA256="{{ source "xtables_sha256_arm" }}"'
+      matchpattern: '(?m)^\s*arm\)\s+K3S_ROOT_SHA256="[a-f0-9]{64}"'
+      replacepattern: '        arm)    K3S_ROOT_SHA256="{{ source "k3sroot_sha256_arm" }}"'
 
 scms:
   default:
@@ -98,13 +98,12 @@ scms:
       
 actions:
   default:
-    title: 'Bump K3s-root version and xtables checksums to {{ source "k3sroot" }}'
+    title: 'Bump K3s-root version and checksums to {{ source "k3sroot" }}'
     kind: github/pullrequest
     spec:
-      automerge: false
+      merge:
+        strategy: auto
       labels:
-        - chore
-        - skip-changelog
-        - status/auto-created
+        - updatecli
     scmid: default
 
