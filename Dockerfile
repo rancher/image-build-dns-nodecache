@@ -17,9 +17,8 @@ RUN set -x && \
     xx-apk add musl-dev gcc  lld 
 ARG TAG=1.26.8
 
-ARG SRC=github.com/kubernetes-sigs/node-local-dns
 ARG PKG=github.com/kubernetes-sigs/node-local-dns
-RUN git clone --depth=1 https://${SRC}.git $GOPATH/src/${PKG}
+RUN git clone --depth=1 https://${PKG}.git $GOPATH/src/${PKG}
 WORKDIR $GOPATH/src/${PKG}
 RUN git tag --list
 RUN git fetch --all --tags --prune
