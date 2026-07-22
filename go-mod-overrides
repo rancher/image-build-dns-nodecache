@@ -19,7 +19,8 @@
 # Remove when upstream node-cache > 1.26.8 is tagged.
 -replace github.com/coredns/coredns=github.com/coredns/coredns@v1.14.3
 # Remove when upstream coredns 1.14.3 is released.
--replace google.golang.org/grpc=google.golang.org/grpc@v1.79.3
+# google.golang.org/grpc: GHSA-hrxh-6v49-42gf (xDS RBAC auth bypass, HTTP/2 Rapid Reset DoS); bump to v1.82.1.
+-replace google.golang.org/grpc=google.golang.org/grpc@v1.82.1
 -replace go.opentelemetry.io/otel/sdk=go.opentelemetry.io/otel/sdk@v1.43.0
 
 # github.com/DataDog/dd-trace-go/v2: CVE-2026-50274 (HIGH) — improper parsing of W3C baggage headers may lead to DoS.
