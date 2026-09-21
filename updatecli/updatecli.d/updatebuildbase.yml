@@ -2,7 +2,9 @@
 name: "Update build base version"
 
 sources:
-  # Read the current version from the Dockerfile
+  # Read the current build base minor from the Dockerfile.
+  # Driving from the current Dockerfile value means a manual forward
+  # minor bump is preserved (we never drop below it).
   current_minor:
     name: Get current build base minor version from Dockerfile
     kind: dockerfile
@@ -22,12 +24,48 @@ sources:
           pattern: '^([0-9]+\.[0-9]+)'
           captureindex: 1
 
-  # Find the latest release matching that minor version
+  # Get the latest upstream tag. Reading the latest tag (rather than the
+  # tag currently pinned in the Dockerfile) lets the GO_IMAGE bump open
+  # alongside the upstream TAG bump instead of waiting for it to merge.
+  latest_tag:
+    name: Get latest upstream tag
+    kind: gittag
+    scmid: upstream
+    spec:
+      versionfilter:
+        kind: semver
+
+  # Read the golang minor required by upstream's go.mod at that tag.
+  upstream_minor:
+    name: Get upstream golang minor from go.mod at the latest tag
+    kind: file
+    dependson:
+      - latest_tag
+    spec:
+      file: 'https://raw.githubusercontent.com/{{ .scm.upstream.owner }}/{{ .scm.upstream.repository }}/{{ source "latest_tag" }}/go.mod'
+      matchpattern: 'go ([0-9]+\.[0-9]+)'
+    transformers:
+      - trimprefix: 'go '
+
+  # Floor minor = max(current Dockerfile minor, upstream go.mod minor).
+  # - upstream ahead  -> follow upstream forward
+  # - current ahead   -> preserve the manual forward bump
+  # sort -V orders the two minors; tail -n1 takes the highest.
+  floor_minor:
+    name: Highest of the current and upstream golang minor
+    kind: shell
+    dependson:
+      - current_minor
+      - upstream_minor
+    spec:
+      command: 'printf "%s\n%s\n" "{{ source "current_minor" }}" "{{ source "upstream_minor" }}" | sort -V | tail -n1'
+
+  # Find the latest build base release for the floor minor.
   latest_patch:
-    name: Get latest build base patch for that minor
+    name: Get latest build base patch for the floor minor
     kind: githubrelease
     dependson:
-      - "current_minor"
+      - floor_minor
     spec:
       owner: rancher
       repository: image-build-base
@@ -43,12 +81,12 @@ sources:
         replaceall:
           pattern: 'b(\d+)$'
           replacement: '-b.$1'
-        # 2. Extract versions matching the current minor (e.g. v1.25)
-        regex: '(v{{ source "current_minor" }}\.\d+.*)'
+        # 2. Extract versions matching the floor minor (e.g. v1.25)
+        regex: '(v{{ source "floor_minor" }}\.\d+.*)'
         # 3. Constraint '~1.25.0-0': >=1.25.0-0 <1.26.0
         #    The '-0' floor is required so SemVer evaluates pre-releases
         #    (every build-base tag is a '-b.N' pre-release).
-        pattern: '~{{ source "current_minor" }}.0-0'
+        pattern: '~{{ source "floor_minor" }}.0-0'
         # Note: regex/semver remaps the result back to the original tag
         # (e.g. 'v1.25.12b1'), so no transformer is needed to undo the
         # '-b.' rewrite — the Dockerfile receives the original 'v...bN' form.
@@ -78,7 +116,14 @@ scms:
       owner: '{{ .scm.default.owner }}'
       repository: '{{ .scm.default.repository }}'
       branch: '{{ .scm.default.branch }}'
-      
+  upstream:
+    kind: github
+    spec:
+      token: '{{ requiredEnv .github.token }}'
+      owner: '{{ .scm.upstream.owner }}'
+      repository: '{{ .scm.upstream.repository }}'
+      branch: '{{ .scm.upstream.branch }}'
+
 actions:
     default:
         title: 'Bump build base version to {{ source "latest_patch" }}'
@@ -90,4 +135,3 @@ actions:
                 - skip-changelog
                 - status/auto-created
         scmid: default
-
