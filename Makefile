@@ -11,22 +11,26 @@ ifndef TARGET_PLATFORMS
 	endif
 endif
 
-BUILD_META=-build$(shell date +%Y%m%d)
-TAG ?= ${GITHUB_ACTION_TAG}
+TRACKED_VERSION := $(shell cat VERSION)
+COMMIT ?= $(shell cat COMMIT)
+VERSION ?= ${GITHUB_ACTION_TAG}
 
-ifeq ($(TAG),)
-TAG := 1.26.8$(BUILD_META)
+ifeq ($(VERSION),)
+VERSION := $(TRACKED_VERSION)
 endif
 
-ifeq (,$(filter %$(BUILD_META),$(TAG)))
-$(error TAG $(TAG) needs to end with build metadata: $(BUILD_META))
+ifneq ($(GITHUB_ACTION_TAG),)
+ifneq ($(GITHUB_ACTION_TAG),$(TRACKED_VERSION))
+$(error GitHub release tag $(GITHUB_ACTION_TAG) does not match VERSION $(TRACKED_VERSION))
+endif
 endif
 
 REPO ?= rancher
-IMAGE = $(REPO)/hardened-dns-node-cache:$(TAG)
+IMAGE = $(REPO)/hardened-dns-node-cache:$(VERSION)
 BUILD_OPTS = \
 	--platform=$(TARGET_PLATFORMS) \
-	--build-arg TAG=$(TAG:$(BUILD_META)=) \
+	--build-arg COMMIT=$(COMMIT) \
+	--build-arg VERSION=$(VERSION) \
 	--tag "$(IMAGE)"
 
 .PHONY: image-build
@@ -57,9 +61,9 @@ image-scan:
 
 .PHONY: log
 log:
-	@echo "TAG=$(TAG:$(BUILD_META)=)"
+	@echo "COMMIT=$(COMMIT)"
+	@echo "VERSION=$(VERSION)"
 	@echo "REPO=$(REPO)"
 	@echo "IMAGE=$(IMAGE)"
-	@echo "BUILD_META=$(BUILD_META)"
 	@echo "UNAME_M=$(UNAME_M)"
 	@echo "TARGET_PLATFORMS=$(TARGET_PLATFORMS)"

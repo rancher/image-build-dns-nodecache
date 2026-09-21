@@ -13,7 +13,8 @@ FROM base AS builder
 ARG TARGETPLATFORM
 RUN set -x && \
     xx-apk add musl-dev gcc  lld 
-ARG TAG=1.26.8
+ARG COMMIT
+ARG VERSION
 ARG K3S_ROOT_VERSION=v0.15.2
 RUN export ARCH=$(xx-info arch) &&\
     case "${ARCH}" in \
@@ -30,13 +31,12 @@ RUN tar xvf /opt/xtables/k3s-root-xtables.tar -C /opt/xtables
 ARG PKG=github.com/kubernetes-sigs/node-local-dns
 RUN git clone --depth=1 https://${PKG}.git $GOPATH/src/${PKG}
 WORKDIR $GOPATH/src/${PKG}
-RUN git tag --list
-RUN git fetch --all --tags --prune
-RUN git checkout tags/${TAG} -b ${TAG}
+RUN git fetch --depth=1 origin ${COMMIT} && \
+    git checkout ${COMMIT}
 COPY go-mod-overrides ./go-mod-overrides
 RUN go-mod-overrides.sh ./go-mod-overrides
 RUN xx-go --wrap &&\
-    GO_LDFLAGS="-linkmode=external -X ${PKG}/pkg/version.VERSION=${TAG}" \
+    GO_LDFLAGS="-linkmode=external -X ${PKG}/pkg/version.VERSION=${VERSION}" \
     go-build-static.sh -gcflags=-trimpath=${GOPATH}/src -o . ./...
 RUN go-assert-static.sh node-cache
 RUN if [ `xx-info arch` = "amd64" ]; then \
@@ -50,6 +50,10 @@ COPY --from=builder /usr/local/bin/node-cache /node-cache
 RUN strip /node-cache
 
 FROM ${BCI_IMAGE}
+ARG COMMIT
+ARG VERSION
+LABEL org.opencontainers.image.revision=${COMMIT} \
+    org.opencontainers.image.version=${VERSION}
 COPY --from=strip_binary /node-cache /node-cache
 COPY --from=builder /opt/xtables/bin/ /usr/sbin/
 ENTRYPOINT ["/node-cache"]
