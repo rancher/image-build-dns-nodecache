@@ -12,6 +12,3 @@ scm:
     owner: kubernetes-sigs
     repository: node-local-dns
     branch: master
-  buildbase:
-    owner: rancher
-    repository: image-build-base
