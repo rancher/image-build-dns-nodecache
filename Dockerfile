@@ -4,8 +4,6 @@ ARG GO_IMAGE=rancher/hardened-build-base:v1.25.14b1
 # Image that provides cross compilation tooling.
 FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.6.1 AS xx
 
-FROM ${BCI_IMAGE} AS bci
-
 FROM --platform=$BUILDPLATFORM ${GO_IMAGE} AS base
 COPY --from=xx / /
 RUN set -x && \
@@ -51,7 +49,7 @@ FROM ${GO_IMAGE} AS strip_binary
 COPY --from=builder /usr/local/bin/node-cache /node-cache
 RUN strip /node-cache
 
-FROM bci
+FROM ${BCI_IMAGE}
 COPY --from=strip_binary /node-cache /node-cache
 COPY --from=builder /opt/xtables/bin/ /usr/sbin/
 ENTRYPOINT ["/node-cache"]
