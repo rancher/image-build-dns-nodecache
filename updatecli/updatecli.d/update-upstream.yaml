@@ -105,9 +105,8 @@ actions:
     kind: github/pullrequest
     spec:
       description: 'Upstream commit: [{{ source "commit" }}](https://github.com/{{ .scm.upstream.owner }}/{{ .scm.upstream.repository }}/commit/{{ source "commit" }})'
-      automerge: false
+      merge:
+        strategy: auto
       labels:
-        - chore
-        - skip-changelog
-        - status/auto-created
+        - updatecli
     scmid: default
