@@ -2,4 +2,5 @@
 * @rancher/k3s
 # Exceptions with no Ownership (automerge allowed)
 Dockerfile
-TAG
+COMMIT
+VERSION

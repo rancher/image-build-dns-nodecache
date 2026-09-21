@@ -1,33 +1,86 @@
 ---
 name: Update upstream version
 sources:
-  tag:
-    name: Get upstream tag
-    kind: gittag
+  commit:
+    name: Get latest upstream master commit
+    kind: gitcommit
     scmid: upstream
     spec:
+      branch: master
+  version:
+    name: Get downstream version for the upstream commit
+    kind: shell
+    scmid: default
+    dependson:
+      - commit
+    spec:
+      command: 'sh ./updatecli/scripts/next-version.sh "{{ source "commit" }}"'
+  gomod:
+    name: Get golang version
+    kind: file
+    dependson:
+      - commit
+    spec:
+      file: 'https://raw.githubusercontent.com/{{ .scm.upstream.owner }}/{{ .scm.upstream.repository }}/{{ source "commit" }}/go.mod'
+      matchpattern: 'go ([0-9]+\.[0-9]+)'
+    transformers:
+      - trimprefix: 'go '
+  buildbase:
+    name: Get build base version
+    kind: githubrelease
+    dependson:
+      - gomod
+    spec:
+      token: '{{ requiredEnv .github.token }}'
+      owner: '{{ .scm.buildbase.owner }}'
+      repository: '{{ .scm.buildbase.repository }}'
+      typefilter:
+        release: true
+        draft: false
+        prerelease: false
       versionfilter:
-        kind: semver
+        kind: regex/semver
+        # Normalize build-base tags such as v1.25.12b1 for SemVer sorting.
+        replaceall:
+          pattern: 'b(\d+)$'
+          replacement: '-b.$1'
+        # Select releases from the Go minor version used by upstream.
+        regex: '(v{{ source "gomod" }}\.\d+.*)'
+        pattern: '~{{ source "gomod" }}.0-0'
+        # Note: regex/semver remaps the result back to the original tag
+        # (e.g. 'v1.25.12b1'), so no transformer is needed to undo the
+        # '-b.' rewrite — the Dockerfile receives the original 'v...bN' form.
 targets:
-  dockerfile:
-    name: 'Bump Dockerfile to upstream version {{ source "tag" }}'
+  commitfile:
+    name: 'Bump COMMIT to upstream master {{ source "commit" }}'
+    kind: file
+    scmid: default
+    sourceid: commit
+    spec:
+      file: COMMIT
+      matchpattern: '(?m)^(.+)$'
+      replacepattern: '{{ source "commit" }}'
+  versionfile:
+    name: 'Bump VERSION to {{ source "version" }}'
+    kind: file
+    scmid: default
+    sourceid: version
+    spec:
+      file: VERSION
+      matchpattern: '(?m)^(.+)$'
+      replacepattern: '{{ source "version" }}'
+  buildbase:
+    name: 'Bump to build base version {{ source "buildbase" }}'
     kind: dockerfile
     scmid: default
-    sourceid: tag
+    sourceid: buildbase
     spec:
       file: Dockerfile
       instruction:
         keyword: ARG
-        matcher: TAG
-  makefile:
-    name: 'Bump Makefile to upstream version {{ source "tag" }}'
-    kind: file
-    scmid: default
-    disablesourceinput: true
-    spec:
-      file: Makefile
-      matchpattern: '(?m)^TAG \:\= (.*)'
-      replacepattern: 'TAG := {{ source "tag" }}$$(BUILD_META)'
+        matcher: GO_IMAGE
+    transformers:
+      - addprefix: 'rancher/hardened-build-base:'
 scms:
   default:
     kind: github
@@ -48,9 +101,10 @@ scms:
       branch: '{{ .scm.upstream.branch }}'
 actions:
   default:
-    title: 'Bump to upstream version {{ source "tag" }}'
+    title: 'Bump node-local-dns to {{ source "version" }}'
     kind: github/pullrequest
     spec:
+      description: 'Upstream commit: [{{ source "commit" }}](https://github.com/{{ .scm.upstream.owner }}/{{ .scm.upstream.repository }}/commit/{{ source "commit" }})'
       automerge: false
       labels:
         - chore
