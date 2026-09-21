@@ -15,10 +15,10 @@
 # Drop once upstream requires github.com/quic-go/quic-go >= v0.59.1.
 -replace github.com/quic-go/quic-go=github.com/quic-go/quic-go@v0.59.1
 
-# Ported from the Dockerfile's inline `go mod edit` block; may no longer be needed.
-# Remove when upstream node-cache > 1.26.8 is tagged.
--replace github.com/coredns/coredns=github.com/coredns/coredns@v1.14.3
-# Remove when upstream coredns 1.14.3 is released.
+# github.com/coredns/coredns: CVE-2026-82399 (unauthenticated memory exhaustion in custom plugins),
+# CVE-2026-86003 (unauthorized DNS record modification via unvalidated DNS updates) — both HIGH.
+# Drop once upstream node-cache requires github.com/coredns/coredns >= v1.14.7.
+-replace github.com/coredns/coredns=github.com/coredns/coredns@v1.14.7
 # google.golang.org/grpc: CVE-2026-84304, CVE-2026-84445 (HIGH), CVE-2026-84303 (MEDIUM); bump to v1.83.2.
 # Drop once upstream requires google.golang.org/grpc >= v1.83.2.
 -replace google.golang.org/grpc=google.golang.org/grpc@v1.83.2
