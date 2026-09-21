@@ -101,10 +101,9 @@ actions:
     title: 'Bump K3s-root version and xtables checksums to {{ source "k3sroot" }}'
     kind: github/pullrequest
     spec:
-      automerge: false
+      merge:
+        strategy: auto
       labels:
-        - chore
-        - skip-changelog
-        - status/auto-created
+        - updatecli
     scmid: default
 
