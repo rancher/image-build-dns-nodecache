@@ -24,25 +24,23 @@ sources:
           pattern: '^([0-9]+\.[0-9]+)'
           captureindex: 1
 
-  # Get the latest upstream tag. Reading the latest tag (rather than the
-  # tag currently pinned in the Dockerfile) lets the GO_IMAGE bump open
-  # alongside the upstream TAG bump instead of waiting for it to merge.
-  latest_tag:
-    name: Get latest upstream tag
-    kind: gittag
+  # Get the latest upstream commit so the build-base check follows upstream
+  # changes without relying on an upstream tag.
+  latest_commit:
+    name: Get latest upstream commit
+    kind: gitcommit
     scmid: upstream
     spec:
-      versionfilter:
-        kind: semver
+      branch: master
 
-  # Read the golang minor required by upstream's go.mod at that tag.
+  # Read the golang minor required by upstream's go.mod at that commit.
   upstream_minor:
-    name: Get upstream golang minor from go.mod at the latest tag
+    name: Get upstream golang minor from go.mod at the latest commit
     kind: file
     dependson:
-      - latest_tag
+      - latest_commit
     spec:
-      file: 'https://raw.githubusercontent.com/{{ .scm.upstream.owner }}/{{ .scm.upstream.repository }}/{{ source "latest_tag" }}/go.mod'
+      file: 'https://raw.githubusercontent.com/{{ .scm.upstream.owner }}/{{ .scm.upstream.repository }}/{{ source "latest_commit" }}/go.mod'
       matchpattern: 'go ([0-9]+\.[0-9]+)'
     transformers:
       - trimprefix: 'go '
