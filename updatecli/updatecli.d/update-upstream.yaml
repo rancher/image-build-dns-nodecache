@@ -15,41 +15,6 @@ sources:
       - commit
     spec:
       command: 'sh ./updatecli/scripts/next-version.sh "{{ source "commit" }}"'
-  gomod:
-    name: Get golang version
-    kind: file
-    dependson:
-      - commit
-    spec:
-      file: 'https://raw.githubusercontent.com/{{ .scm.upstream.owner }}/{{ .scm.upstream.repository }}/{{ source "commit" }}/go.mod'
-      matchpattern: 'go ([0-9]+\.[0-9]+)'
-    transformers:
-      - trimprefix: 'go '
-  buildbase:
-    name: Get build base version
-    kind: githubrelease
-    dependson:
-      - gomod
-    spec:
-      token: '{{ requiredEnv .github.token }}'
-      owner: '{{ .scm.buildbase.owner }}'
-      repository: '{{ .scm.buildbase.repository }}'
-      typefilter:
-        release: true
-        draft: false
-        prerelease: false
-      versionfilter:
-        kind: regex/semver
-        # Normalize build-base tags such as v1.25.12b1 for SemVer sorting.
-        replaceall:
-          pattern: 'b(\d+)$'
-          replacement: '-b.$1'
-        # Select releases from the Go minor version used by upstream.
-        regex: '(v{{ source "gomod" }}\.\d+.*)'
-        pattern: '~{{ source "gomod" }}.0-0'
-        # Note: regex/semver remaps the result back to the original tag
-        # (e.g. 'v1.25.12b1'), so no transformer is needed to undo the
-        # '-b.' rewrite — the Dockerfile receives the original 'v...bN' form.
 targets:
   commitfile:
     name: 'Bump COMMIT to upstream master {{ source "commit" }}'
@@ -69,18 +34,6 @@ targets:
       file: VERSION
       matchpattern: '(?m)^(.+)$'
       replacepattern: '{{ source "version" }}'
-  buildbase:
-    name: 'Bump to build base version {{ source "buildbase" }}'
-    kind: dockerfile
-    scmid: default
-    sourceid: buildbase
-    spec:
-      file: Dockerfile
-      instruction:
-        keyword: ARG
-        matcher: GO_IMAGE
-    transformers:
-      - addprefix: 'rancher/hardened-build-base:'
 scms:
   default:
     kind: github
