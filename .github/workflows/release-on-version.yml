@@ -24,7 +24,8 @@ jobs:
 
       - name: Read release tag from VERSION
         run: |
-          echo "RELEASE_TAG=$(cat VERSION)" >> "$GITHUB_ENV"
+          BUILD_META="$(make -s log | sed -n 's/^BUILD_META=//p')"
+          echo "RELEASE_TAG=$(cat VERSION)${BUILD_META}" >> "$GITHUB_ENV"
 
       - name: Validate tracked-file changes and release uniqueness
         id: validate
