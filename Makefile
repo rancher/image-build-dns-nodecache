@@ -11,18 +11,16 @@ ifndef TARGET_PLATFORMS
 	endif
 endif
 
-TRACKED_VERSION := $(shell cat VERSION)
 COMMIT ?= $(shell cat COMMIT)
 VERSION ?= ${GITHUB_ACTION_TAG}
+BUILD_META=-build$(shell date +%Y%m%d)
 
 ifeq ($(VERSION),)
-VERSION := $(TRACKED_VERSION)
+VERSION := $(shell cat VERSION)$(BUILD_META)
 endif
 
-ifneq ($(GITHUB_ACTION_TAG),)
-ifneq ($(GITHUB_ACTION_TAG),$(TRACKED_VERSION))
-$(error GitHub release tag $(GITHUB_ACTION_TAG) does not match VERSION $(TRACKED_VERSION))
-endif
+ifeq (,$(filter %$(BUILD_META),$(VERSION)))
+$(error VERSION $(VERSION) needs to end with build metadata: $(BUILD_META))
 endif
 
 REPO ?= rancher
