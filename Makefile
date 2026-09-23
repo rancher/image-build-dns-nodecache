@@ -63,5 +63,6 @@ log:
 	@echo "VERSION=$(VERSION)"
 	@echo "REPO=$(REPO)"
 	@echo "IMAGE=$(IMAGE)"
+	@echo "BUILD_META=$(BUILD_META)"
 	@echo "UNAME_M=$(UNAME_M)"
 	@echo "TARGET_PLATFORMS=$(TARGET_PLATFORMS)"
