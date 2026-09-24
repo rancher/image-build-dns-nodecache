@@ -2,8 +2,8 @@ name: "Updatecli: Dependency Management"
 
 on:
   schedule:
-    # Runs at 06 PM UTC
-    - cron: '0 18 * * *'
+    # Weekly on Mondays
+    - cron: '0 18 * * 1'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -66,7 +66,7 @@ jobs:
 
       - name: Apply Updatecli
         # Never use '--debug' option, because it might leak the access tokens.
-        run: updatecli pipeline apply --clean -c ./updatecli/updatecli.d/updatebuildbase.yaml -c ./updatecli/updatecli.d/updatek3sroot.yaml --values ./updatecli/values.yaml
+        run: "updatecli pipeline apply --clean --config ./updatecli/updatecli.d/update-upstream.yaml --values ./updatecli/values.yaml"
         env:
           UPDATECLI_GITHUB_ACTOR: renovate-rancher[bot]
           UPDATECLI_GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}

@@ -16,15 +16,7 @@ sources:
     spec:
       command: 'sh ./updatecli/scripts/next-version.sh "{{ source "commit" }}"'
 targets:
-  commitfile:
-    name: 'Bump COMMIT to upstream master {{ source "commit" }}'
-    kind: file
-    scmid: default
-    sourceid: commit
-    spec:
-      file: COMMIT
-      matchpattern: '(?m)^(.+)$'
-      replacepattern: '{{ source "commit" }}'
+  # version needs to resolve first so the (-rN) gets bumped in the case of a new commit (but not tag) from upstream
   versionfile:
     name: 'Bump VERSION to {{ source "version" }}'
     kind: file
@@ -34,6 +26,15 @@ targets:
       file: VERSION
       matchpattern: '(?m)^(.+)$'
       replacepattern: '{{ source "version" }}'
+  commitfile:
+    name: 'Bump COMMIT to upstream master {{ source "commit" }}'
+    kind: file
+    scmid: default
+    sourceid: commit
+    spec:
+      file: COMMIT
+      matchpattern: '(?m)^(.+)$'
+      replacepattern: '{{ source "commit" }}'
 scms:
   default:
     kind: github
