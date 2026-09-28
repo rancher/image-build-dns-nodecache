@@ -1,4 +1,4 @@
-name: "Updatecli: Dependency Management"
+name: "Updatecli: Upstream Commit"
 
 on:
   schedule:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  updatecli:
+  updatecli-upstream:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     permissions:
