@@ -15,7 +15,7 @@ RUN set -x && \
     xx-apk add musl-dev gcc  lld 
 ARG COMMIT
 ARG VERSION
-ARG K3S_ROOT_VERSION=v0.15.2
+ARG K3S_ROOT_VERSION=v0.15.3
 RUN export ARCH=$(xx-info arch) &&\
     case "${ARCH}" in \
         amd64)  XTABLES_SHA256="1272950a6dd969ced16f36eed91f3cc3feb552edbb7d6dcfbfc9b04930d9ba3f" ;; \
