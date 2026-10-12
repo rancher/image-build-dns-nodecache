@@ -3,8 +3,8 @@ set -eu
 
 new_commit=$1
 upstream_url=https://github.com/kubernetes-sigs/node-local-dns.git
-current_commit=$(tr -d '\n' < COMMIT)
-current_version=$(tr -d '\n' < VERSION)
+current_commit=$(git show HEAD:COMMIT | tr -d '\n')
+current_version=$(git show HEAD:VERSION | tr -d '\n')
 current_base=${current_version%-r*}
 current_revision=${current_version##*-r}
 
