@@ -1,5 +1,5 @@
 ARG BCI_IMAGE=registry.suse.com/bci/bci-busybox
-ARG GO_IMAGE=rancher/hardened-build-base:v1.26.9b2
+ARG GO_IMAGE=rancher/hardened-build-base:v1.26.9b3
 
 # Image that provides cross compilation tooling.
 FROM --platform=$BUILDPLATFORM rancher/mirrored-tonistiigi-xx:1.6.1 AS xx
@@ -34,7 +34,7 @@ WORKDIR $GOPATH/src/${PKG}
 RUN git fetch --depth=1 origin ${COMMIT} && \
     git checkout ${COMMIT}
 COPY go-mod-overrides ./go-mod-overrides
-RUN go-mod-overrides.sh ./go-mod-overrides
+RUN go-mod-replacer -local ./go-mod-overrides
 RUN xx-go --wrap &&\
     GO_LDFLAGS="-linkmode=external -X ${PKG}/pkg/version.VERSION=${VERSION}" \
     go-build-static.sh -gcflags=-trimpath=${GOPATH}/src -o . ./...
