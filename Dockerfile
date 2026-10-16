@@ -34,7 +34,7 @@ WORKDIR $GOPATH/src/${PKG}
 RUN git fetch --depth=1 origin ${COMMIT} && \
     git checkout ${COMMIT}
 COPY go-mod-overrides ./go-mod-overrides
-RUN go-mod-overrides.sh ./go-mod-overrides
+RUN go-mod-replacer -local ./go-mod-overrides
 RUN xx-go --wrap &&\
     GO_LDFLAGS="-linkmode=external -X ${PKG}/pkg/version.VERSION=${VERSION}" \
     go-build-static.sh -gcflags=-trimpath=${GOPATH}/src -o . ./...
