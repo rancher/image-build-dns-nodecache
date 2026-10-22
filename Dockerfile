@@ -19,7 +19,7 @@ ARG K3S_ROOT_VERSION=v0.15.4
 RUN export ARCH=$(xx-info arch) &&\
     case "${ARCH}" in \
         amd64)  XTABLES_SHA256="b615039d1196a80b374dff031a3f89c3c1d91f67cb08acc54d8d0276a6e7b933" ;; \
-        arm64)  XTABLES_SHA256="2a5f8f463a28610394ab9bd9563f1327126765349e7bb8b575b0f279bf3e7ede" ;; \
+        arm64)  XTABLES_SHA256="26ccf8b7c2678410965bcf85a10be297b757bf3aa75f022350b87ca6ed363695" ;; \
         arm)    XTABLES_SHA256="879c8f39939b0e85140995138ae11abdd9fcc073f1b89fd1a8ff3514fbce679a" ;; \
         *)      echo "No pinned SHA256 for k3s-root-xtables on arch: ${ARCH}" >&2; exit 1 ;; \
     esac &&\
